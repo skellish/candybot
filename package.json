@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/skellish/candybot/issues"
   },
-  "homepage": "https://github.com/skellish/candybot#readme"
+  "homepage": "https://github.com/skellish/candybot#readme",
+  "dependencies": {
+    "aws-iot-device-sdk": "^1.0.11",
+    "forever": "^0.15.1",
+    "onoff": "^1.0.4"
+  }
 }
