@@ -1,6 +1,7 @@
 
 function exit() {
-	led.unexport();
+	statusLedPin.unexport();
+	motorPin.unexport();
 	process.exit();
 }
 
@@ -39,9 +40,11 @@ function registerAndSubscribe() {
 
 var awsIot = require('aws-iot-device-sdk');
 var Gpio = require('onoff').Gpio;
-var led = new Gpio(18,'out');
+var statusLedPin = new Gpio(18,'out');
+//var motorPin = new Gpio(23,'out');
+var motorPin = statusLedPin;
 
-var debug = true;
+var debug = false;
 var thingName = 'CNDYBOT';
 var dispenseTopic = 'itp/things/CandyBot/Dispense';
 
@@ -85,6 +88,14 @@ var candyBotState = {
 cndyBotShadow.on('connect', function () {
 	debugOut('connected');
 	registerAndSubscribe();
+
+	// Toggle status led indicating initialize complete
+	statusLedPin.writeSync(1);
+	setTimeout(function() {
+		statusLedPin.writeSync(0);
+	},0.5*1000);
+	debugOut('Ready...');
+
 });
 
 cndyBotShadow.on('reconnect', function () {
@@ -114,11 +125,7 @@ cndyBotShadow.on('status', function (thingName, status, clientToken, stateObject
 			candyBotState = stateObject;
 		}
 	}
-	console.log('status', 'ThingName: ', thingName, 'Status: ', status, 'ClientToken: ', clientToken, 'stateObject: ', JSON.stringify(stateObject));
-});
-
-cndyBotShadow.on('delta', function (thingName, stateObject) {
-	console.log('delta', 'ThingName: ', thingName, 'stateObject: ', JSON.stringify(stateObject));
+	debugOut('status', 'ThingName: ', thingName, 'Status: ', status, 'ClientToken: ', clientToken, 'stateObject: ', JSON.stringify(stateObject));
 });
 
 cndyBotShadow.on('message', function (topic, message) {
@@ -137,32 +144,32 @@ cndyBotShadow.on('message', function (topic, message) {
 		}
 		if (duration > 0) {
 			// Motor on
-			console.log('motor on for ' + duration + ' seconds');
-			led.writeSync(1);
+			debugOut('motor on for ' + duration + ' seconds');
+			motorPin.writeSync(1);
 
 			// turn off the motor
 			setTimeout(function () {
-				console.log('motor off');
-				led.writeSync(0);
+				debugOut('motor off');
+				motorPin.writeSync(0);
 
 				// And update shadow state with new dispensed count
 				cndyBotShadow.update('CNDYBOT', candyBotState);
 			}, duration * 1000);
 		}
 	}
-	console.log('message', 'topic: ', topic, 'payload: ', payload.toString());
+	debugOut('message', 'topic: ', topic, 'payload: ', payload.toString());
 });
 
 cndyBotShadow.on('close', function () {
-	console.log('close');
+	debugOut('close');
 });
 
 cndyBotShadow.on('offline', function () {
-	console.log('offline');
+	debugOut('offline');
 });
 
 cndyBotShadow.on('error', function (error) {
-	console.log('error', error);
+	debugOut('error', error);
 });
 
 
