@@ -39,6 +39,7 @@ function registerAndSubscribe() {
 
 var awsIot = require('aws-iot-device-sdk');
 var Gpio = require('onoff').Gpio;
+var led = new Gpio(18,'out');
 
 var debug = true;
 var thingName = 'CNDYBOT';
@@ -126,23 +127,23 @@ cndyBotShadow.on('message', function (topic, message) {
 		var duration = 0;
 		switch (payload.size) {
 		case 'small':
-			duration = 0.5;
+			duration = 0.4;
 			candyBotState.state.reported.dispensed.small++;
 			break;
 		case 'large':
-			duration = 2.0;
+			duration = 1.0;
 			candyBotState.state.reported.dispensed.large++;
 			break;
 		}
 		if (duration > 0) {
 			// Motor on
 			console.log('motor on for ' + duration + ' seconds');
-			Gpio.writeSync(on);
+			led.writeSync(1);
 
 			// turn off the motor
 			setTimeout(function () {
 				console.log('motor off');
-				Gpio.writeSync(off);
+				led.writeSync(0);
 
 				// And update shadow state with new dispensed count
 				cndyBotShadow.update('CNDYBOT', candyBotState);
