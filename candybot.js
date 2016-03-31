@@ -41,8 +41,8 @@ function registerAndSubscribe() {
 var awsIot = require('aws-iot-device-sdk');
 var Gpio = require('onoff').Gpio;
 var statusLedPin = new Gpio(18,'out');
-//var motorPin = new Gpio(23,'out');
-var motorPin = statusLedPin;
+var motorPin = new Gpio(24,'out');
+var buttonPin = new Gpio(25, 'in');
 
 var debug = false;
 var thingName = 'CNDYBOT';
