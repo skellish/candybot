@@ -12,6 +12,7 @@ function debugOut() {
 }
 
 function registerAndSubscribe() {
+	
 	// Register with our shadow thing
 	debugOut('registering ' + thingName);
 	cndyBotShadow.register(thingName, {
@@ -41,8 +42,8 @@ function registerAndSubscribe() {
 var awsIot = require('aws-iot-device-sdk');
 var Gpio = require('onoff').Gpio;
 var statusLedPin = new Gpio(18,'out');
-var motorPin = new Gpio(24,'out');
-var buttonPin = new Gpio(25, 'in');
+var motorPin = new Gpio(23,'out');
+var buttonPin = new Gpio(12, 'in');
 
 var debug = false;
 var thingName = 'CNDYBOT';
