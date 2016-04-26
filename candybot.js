@@ -1,4 +1,3 @@
-
 function exit() {
 	statusLedPin.unexport();
 	motorPin.unexport();
@@ -44,6 +43,8 @@ var Gpio = require('onoff').Gpio;
 var statusLedPin = new Gpio(18,'out');
 var motorPin = new Gpio(23,'out');
 var buttonPin = new Gpio(12, 'in');
+
+process.on('SIGINT',exit);
 
 var debug = false;
 var thingName = 'CNDYBOT';
@@ -92,10 +93,15 @@ cndyBotShadow.on('connect', function () {
 
 	// Toggle status led indicating initialize complete
 	statusLedPin.writeSync(1);
+	var iv = setInterval(function() {
+		statusLedPin.writeSync(statusLedPin.readSync() ? 0 : 1);
+	}, 300);
+
 	setTimeout(function() {
+		clearInterval(iv);
 		statusLedPin.writeSync(0);
-	},0.5*1000);
-	debugOut('Ready...');
+		debugOut('Ready...');
+	},2400);
 
 });
 
@@ -135,23 +141,25 @@ cndyBotShadow.on('message', function (topic, message) {
 		var duration = 0;
 		switch (payload.size) {
 		case 'small':
-			duration = 0.4;
+			duration = 0.2;
 			candyBotState.state.reported.dispensed.small++;
 			break;
 		case 'large':
-			duration = 1.0;
+			duration = 0.5;
 			candyBotState.state.reported.dispensed.large++;
 			break;
 		}
 		if (duration > 0) {
-			// Motor on
+			// Motor and status led on
 			debugOut('motor on for ' + duration + ' seconds');
 			motorPin.writeSync(1);
+			statusLedPin.writeSync(1);
 
-			// turn off the motor
+			// turn off the motor and status led
 			setTimeout(function () {
 				debugOut('motor off');
 				motorPin.writeSync(0);
+				statusLedPin.writeSync(0);
 
 				// And update shadow state with new dispensed count
 				cndyBotShadow.update('CNDYBOT', candyBotState);
